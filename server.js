@@ -2,7 +2,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const pool = require('./connection');
-const url = 'localhost';
+// const url = 'localhost';
+const Joi = require('joi');
+
 
 
 
@@ -49,10 +51,21 @@ app.get('/tasks/:id', (req, res) => {
     
 });
 
+
 // --------------------     POST   --------------------------
 
 
 app.post('/tasks', (req, res) => {
+    const schema = {                                            //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
+        name: Joi.string().min(3).required()                    //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
+    };
+
+    const result = Joi.validate(req.body, schema);              //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
+    if(result.error) {                                          //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
+        res.status(400).send(result.error.details[0].message);  //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
+        return;
+    }
+
     const task = {
     id: localDatabase.length +1,
     name: req.body.name
@@ -91,16 +104,3 @@ app.listen(port, () => console.log(`Listening on port ${port}...`));
     //   console.log('DISCONNECT');
     // });
 
-
-
-
-
-
-//  --------------------  VALIDACIA  ------------------------
-// function validateMovie(movie) {
-//     const schema = {
-//         name: Joi.string().min(3).required(),
-//         year: Joi.number()
-//     };
-//     return Joi.validate(movie, schema);
-// }
