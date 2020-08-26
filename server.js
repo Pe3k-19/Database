@@ -31,14 +31,9 @@ app.get('/', (req, res) => {
     res.send('Hello world!');
 });
 
-app.get('/api', (req, res) => {
-    res.send([10, 20, 30]);
-});
-
 app.get('/tasks', (req, res) =>{
     res.send(localDatabase);
 });
-
 
 app.get('/tasks/:id', (req, res) => {
     const id = Number(req.params.id);
@@ -48,7 +43,7 @@ app.get('/tasks/:id', (req, res) => {
         } else {
             res.status(404).send('Uloha sa nenasla');
         }
-    
+
 });
 
 
@@ -56,13 +51,9 @@ app.get('/tasks/:id', (req, res) => {
 
 
 app.post('/tasks', (req, res) => {
-    const schema = {                                            //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
-        name: Joi.string().min(3).required()                    //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
-    };
-
-    const result = Joi.validate(req.body, schema);              //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
-    if(result.error) {                                          //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
-        res.status(400).send(result.error.details[0].message);  //  >>>>>>>>>>>>>>>>>>>>  VALIDACIA  ------------------------
+    const { error } = validateTask(req.body);
+    if(error) {                                          
+        res.status(400).send(result.error.details[0].message);
         return;
     }
 
@@ -74,6 +65,34 @@ app.post('/tasks', (req, res) => {
 localDatabase.push(task);
 res.send(task);
 });
+
+// ------------------------  PUT  ----------------------------
+
+app.put('/tasks/:id', (req, res) => {
+    const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+    if(!task) res.status(404).send('Uloha sa nenasla')
+
+    
+    const { error } = validateTask(req.body);
+    if(error) {                                          
+        res.status(400).send(error.details[0].message);  
+        return;
+    }
+    task.name = req.body.name;
+    res.send(task);
+})
+
+//  -----------------------  VALIDACIA  ------------------------
+
+
+function validateTask(task) {                                 
+    const schema = {                                           
+        name: Joi.string().min(3).required()            
+    };
+
+    return Joi.validate(task, schema); 
+}
+
 
 const port = process.env.PORT || 3000;
 //  Zmena v konzole set PORT=cislo portu
