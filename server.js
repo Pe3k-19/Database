@@ -49,6 +49,19 @@ app.get('/tasks/:id', (req, res) => {
     
 });
 
+// --------------------     POST   --------------------------
+
+
+app.post('/tasks', (req, res) => {
+    const task = {
+    id: localDatabase.length +1,
+    name: req.body.name
+    };
+
+localDatabase.push(task);
+res.send(task);
+});
+
 const port = process.env.PORT || 3000;
 //  Zmena v konzole set PORT=cislo portu
 app.listen(port, () => console.log(`Listening on port ${port}...`));
@@ -81,23 +94,6 @@ app.listen(port, () => console.log(`Listening on port ${port}...`));
 
 
 
-// --------------------     POST   --------------------------
-
-
-// app.post('/api/movies', (req, res) => {
-//     const { error } = validateMovie(req.body);
-//     if(error) {
-//         res.status(400).send(error.details[0].message);
-//     } else {
-//     const movie = {
-//     id: movies.length +1,
-//     name: req.body.name,
-//     year: req.body.year
-// }
-// movies.push(movie);
-// res.send(movie);
-//     }
-// });
 
 
 //  --------------------  VALIDACIA  ------------------------
