@@ -4,10 +4,23 @@ app.use(express.json());
 const pool = require('./connection');
 const url = 'localhost';
 
+// favicon error 
+<link rel="shortcut icon" href=""></link>
 
 
 pool.getConnection()
 .then(conn => {console.log('Connect')})
+
+const localDatabase = [
+    {id: 1,
+    name: 'Upratat izbu'},
+    {id: 2,
+    name: 'Vycistit stenu'},
+    {id: 3,
+    name: 'pozametat'},
+    {id: 4,
+    name: 'opravit mixer'}
+]
 
 
 // --------------------     GET   --------------------------
@@ -25,20 +38,20 @@ app.get('/reverse/:text', (req, res) => {
     res.send([...req.params.text].reverse().join(''));
 });
 
-app.get('/api/movies', (req, res) =>{
-    res.send([1, 2, 3, 5, 4, 8, 9]);
+app.get('/api/ldb', (req, res) =>{
+    res.send(localDatabase);
 });
 
-app.get('/api/movies/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const movie = movies.find( movie => movie.id === id);
-    if(movie) {
-            res.send(movie);
-        } else {
-            res.status(404).send('Film sa nenasiel');
-        }
+// app.get('/api/movies/:id', (req, res) => {
+//     const id = Number(req.params.id);
+//     const movie = movies.find( movie => movie.id === id);
+//     if(movie) {
+//             res.send(movie);
+//         } else {
+//             res.status(404).send('Film sa nenasiel');
+//         }
     
-});
+// });
 
 
     
@@ -89,9 +102,9 @@ app.get('/api/movies/:id', (req, res) => {
 
 
 
-
-
-app.listen(3000, () => console.log('Listening on port 3000...'));
+const port = process.env.PORT || 3000;
+//  Zmena v konzole set PORT=cislo portu
+app.listen(port, () => console.log(`Listening on port ${port}...`));
 
 // function validateMovie(movie) {
 //     const schema = {
