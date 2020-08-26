@@ -4,8 +4,6 @@ app.use(express.json());
 const pool = require('./connection');
 const url = 'localhost';
 
-// favicon error 
-<link rel="shortcut icon" href=""></link>
 
 
 pool.getConnection()
@@ -34,25 +32,26 @@ app.get('/', (req, res) => {
 app.get('/api', (req, res) => {
     res.send([10, 20, 30]);
 });
-app.get('/reverse/:text', (req, res) => {
-    res.send([...req.params.text].reverse().join(''));
-});
 
-app.get('/api/ldb', (req, res) =>{
+app.get('/tasks', (req, res) =>{
     res.send(localDatabase);
 });
 
-// app.get('/api/movies/:id', (req, res) => {
-//     const id = Number(req.params.id);
-//     const movie = movies.find( movie => movie.id === id);
-//     if(movie) {
-//             res.send(movie);
-//         } else {
-//             res.status(404).send('Film sa nenasiel');
-//         }
-    
-// });
 
+app.get('/tasks/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const task = localDatabase.find(task => task.id === id);
+    if(task) {
+            res.send(task);
+        } else {
+            res.status(404).send('Uloha sa nenasla');
+        }
+    
+});
+
+const port = process.env.PORT || 3000;
+//  Zmena v konzole set PORT=cislo portu
+app.listen(port, () => console.log(`Listening on port ${port}...`));
 
     
       // conn.query("SELECT name FROM ulohy")
@@ -101,11 +100,7 @@ app.get('/api/ldb', (req, res) =>{
 // });
 
 
-
-const port = process.env.PORT || 3000;
-//  Zmena v konzole set PORT=cislo portu
-app.listen(port, () => console.log(`Listening on port ${port}...`));
-
+//  --------------------  VALIDACIA  ------------------------
 // function validateMovie(movie) {
 //     const schema = {
 //         name: Joi.string().min(3).required(),
