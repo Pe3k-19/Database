@@ -26,7 +26,6 @@ const localDatabase = [
 // --------------------     GET   --------------------------
 
 
-
 app.get('/', (req, res) => {
     res.send('Hello world!');
 });
@@ -36,14 +35,9 @@ app.get('/tasks', (req, res) =>{
 });
 
 app.get('/tasks/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const task = localDatabase.find(task => task.id === id);
-    if(task) {
-            res.send(task);
-        } else {
-            res.status(404).send('Uloha sa nenasla');
-        }
-
+    const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+    if(!task) return res.status(404).send('Uloha sa nenasla')
+    res.send(task);
 });
 
 
@@ -52,10 +46,7 @@ app.get('/tasks/:id', (req, res) => {
 
 app.post('/tasks', (req, res) => {
     const { error } = validateTask(req.body);
-    if(error) {                                          
-        res.status(400).send(result.error.details[0].message);
-        return;
-    }
+    if(error) return res.status(400).send(error.details[0].message);
 
     const task = {
     id: localDatabase.length +1,
@@ -70,17 +61,27 @@ res.send(task);
 
 app.put('/tasks/:id', (req, res) => {
     const task = localDatabase.find(task => task.id === parseInt(req.params.id));
-    if(!task) res.status(404).send('Uloha sa nenasla')
+    if(!task) return res.status(404).send('Uloha sa nenasla')
 
     
     const { error } = validateTask(req.body);
-    if(error) {                                          
-        res.status(400).send(error.details[0].message);  
-        return;
-    }
+    if(error) return res.status(400).send(error.details[0].message);  
+
     task.name = req.body.name;
     res.send(task);
-})
+});
+
+// ------------------------  DELETE  ----------------------------
+
+app.delete('/tasks/:id', (req, res) => {
+    const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+    if(!task) return res.status(404).send('Uloha sa nenasla');
+
+    const index = localDatabase.indexOf(task);
+    localDatabase.splice(index, 1);
+
+    res.send(task);
+});
 
 //  -----------------------  VALIDACIA  ------------------------
 
