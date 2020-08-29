@@ -1,15 +1,13 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
+// app.use(express.urlencoded({ extended : false }));
 const pool = require('./connection');
-// const url = 'localhost';
 const Joi = require('joi');
-
-
-
-
-pool.getConnection()
-.then(conn => {console.log('Connect')})
+const dotenv = require('dotenv');
+const { response } = require('express');
+dotenv.config();
+const port = process.env.PORT || 3000;
 
 const localDatabase = [
     {id: 1,
@@ -21,6 +19,47 @@ const localDatabase = [
     {id: 4,
     name: 'opravit mixer'}
 ]
+
+
+pool.getConnection()
+    .then(conn => {
+    
+      conn.query("SELECT * FROM ulohy")
+        .then((res) => {
+          console.log(res);
+        //   app.get("/push", (req, res) => {
+        //     res.send(data);
+          //Table must have been created before 
+          // " CREATE TABLE myTable (id int, val varchar(255)) "
+          return conn.query("INSERT INTO ulohy value (?, ?)", [res.length + 1, "nova uloha"]);
+
+    // });
+        })
+        // .then((res) => {
+        //   console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
+        //   conn.end();
+        // })
+
+        
+        .catch(err => {
+          //handle error
+          console.log(err); 
+          conn.end();
+        })
+        
+    }).catch(err => {
+        console.log('Not connect')
+    });
+
+
+
+
+
+
+
+
+
+
 
 
 // --------------------     GET   --------------------------
@@ -39,6 +78,16 @@ app.get('/tasks/:id', (req, res) => {
     if(!task) return res.status(404).send('Uloha sa nenasla')
     res.send(task);
 });
+// --------------------------------------------------------
+// app.get('/getAll', (req, res) => {
+//     const db = DbService.getDbServiceInstance();
+
+//     const result = db.getAllData();
+
+//     result
+//     .then(data => response.json({data : data}))
+//     .then(err => console.log(err));
+// })
 
 
 // --------------------     POST   --------------------------
@@ -56,6 +105,11 @@ app.post('/tasks', (req, res) => {
 localDatabase.push(task);
 res.send(task);
 });
+
+// ---------------------------------------------------------
+// app.post('/insert', (req, res) => {
+
+// })
 
 // ------------------------  PUT  ----------------------------
 
@@ -95,32 +149,36 @@ function validateTask(task) {
 }
 
 
-const port = process.env.PORT || 3000;
-//  Zmena v konzole set PORT=cislo portu
+
+
+// app.query("SELECT * FROM ulohy")
+// .then((name) => {
+//   res.send(name)
+
+//   " CREATE TABLE myTable (id int, val varchar(255)) "
+
+//   return conn.query("INSERT INTO ulohy value (?, ?)", [25, "vlozena uloha"]);
+// })
+
+// .then((res) => {
+//   console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
+//   conn.end();
+// })
+// .catch(err => {
+//   //handle error
+//   console.log(err); 
+//   conn.end();
+
+// }).catch(err => {
+// console.log('DISCONNECT');
+// })
+
+
+
+
+
+
+
+
 app.listen(port, () => console.log(`Listening on port ${port}...`));
-
-    
-      // conn.query("SELECT name FROM ulohy")
-      //   .then((name) => {
-      //     console.log(name); //[ {val: 1}, meta: ... ]
-
-          // " CREATE TABLE myTable (id int, val varchar(255)) "
-
-          // return conn.query("INSERT INTO ulohy value (?, ?)", [25, "vlozena uloha"]);
-        // })
-
-        
-        // .then((res) => {
-        //   console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-        //   conn.end();
-        // })
-    //     .catch(err => {
-    //       //handle error
-    //       console.log(err); 
-    //       conn.end();
-    //     })
-        
-    // }).catch(err => {
-    //   console.log('DISCONNECT');
-    // });
 
