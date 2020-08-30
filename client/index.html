@@ -33,7 +33,19 @@
             </tbody>
         </table>
     </main>
+    <script type="text/javascript">
+        var opts = {
+            url: 'http://localhost:5000/'
+         };
 
+         fetch(opts)
+             .then((res) => {
+                 if (res.ok) {
+                     return res.json();
+                 }
+              })
+              .catch(console.log);
+    </script>
 </body>
 
 </html>
