@@ -53,6 +53,13 @@ const getTask = () => {
 }
 
 
+const deleteTask = (id) => {
+    pool.getConnection()
+    .then(conn => {
+        conn.query(`DELETE FROM ulohy WHERE id = ${id}`)
+    })
+}
+
 
 // pool.getConnection()
 //     .then(conn => {
@@ -102,7 +109,8 @@ const getTask = () => {
 //   })
 
 // --------------------     GET   --------------------------
-addNewTask('Nova Uloha');
+// addNewTask('Nova Uloha');
+// deleteTask(19);
 getTask();
 
 
