@@ -31,9 +31,9 @@ const addNewTask = (text) => {
     pool.getConnection()
         .then(conn => {
             conn.query("SELECT * FROM ulohy")
-                .then((res, rej) => {
-                    conn.query("INSERT INTO ulohy VALUE (?,?)", [res.length, text]);
-                    console.log(res.length, text)  // kontrola v konzole
+                .then((req, res) => {
+                    conn.query("INSERT INTO ulohy VALUE (?,?)", [req.length, text]);
+                    console.log(req.length, text)  // kontrola v konzole
                 })
         })
 }
@@ -42,9 +42,9 @@ const getTask = () => {
     pool.getConnection()
         .then(conn => {
             conn.query("SELECT * FROM ulohy")
-                .then((resolve, reject) => {
-                    if (resolve) {
-                        console.log(resolve);
+                .then((req, res) => {
+                    if (req) {
+                        console.log(req);
                     } else {
                         console.log('Fail');
                     }
@@ -52,6 +52,12 @@ const getTask = () => {
         })
 }
 
+const updateTask = (id, text) => {
+    pool.getConnection()
+        .then(conn => {
+        conn.query(`UPDATE ulohy SET name = '${text}' WHERE id = ${id}`)
+        })
+}
 
 const deleteTask = (id) => {
     pool.getConnection()
@@ -59,6 +65,7 @@ const deleteTask = (id) => {
         conn.query(`DELETE FROM ulohy WHERE id = ${id}`)
     })
 }
+
 
 
 // pool.getConnection()
@@ -109,24 +116,23 @@ const deleteTask = (id) => {
 //   })
 
 // --------------------     GET   --------------------------
-// addNewTask('Nova Uloha');
-// deleteTask(19);
+
 getTask();
 
 
-app.get('/', (req, res) => {
-    res.send('Hello world!');
-});
+// app.get('/', (req, res) => {
+//     res.send('Hello world!');
+// });
 
-app.get('/tasks', (req, res) => {
-    res.send(localDatabase);
-});
+// app.get('/tasks', (req, res) => {
+//     res.send(localDatabase);
+// });
 
-app.get('/tasks/:id', (req, res) => {
-    const task = localDatabase.find(task => task.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Uloha sa nenasla')
-    res.send(task);
-});
+// app.get('/tasks/:id', (req, res) => {
+//     const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+//     if (!task) return res.status(404).send('Uloha sa nenasla')
+//     res.send(task);
+// });
 // --------------------------------------------------------
 
 // app.get('/rows',  function(req, res) {
@@ -154,53 +160,59 @@ app.get('/tasks/:id', (req, res) => {
 
 // --------------------     POST   --------------------------
 
+addNewTask('Nova Uloha');
 
 
 
 
-app.post('/tasks', (req, res) => {
-    const { error } = validateTask(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+// app.post('/tasks', (req, res) => {
+//     const { error } = validateTask(req.body);
+//     if (error) return res.status(400).send(error.details[0].message);
 
-    const task = {
-        id: localDatabase.length + 1,
-        name: req.body.name
-    };
+//     const task = {
+//         id: localDatabase.length + 1,
+//         name: req.body.name
+//     };
 
-    localDatabase.push(task);
-    res.send(task);
-});
+//     localDatabase.push(task);
+//     res.send(task);
+// });
 
-// ---------------------------------------------------------
-// app.post('/insert', (req, res) => {
 
-// })
 
 // ------------------------  PUT  ----------------------------
 
-app.put('/tasks/:id', (req, res) => {
-    const task = localDatabase.find(task => task.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Uloha sa nenasla')
+updateTask(5, "update");
 
 
-    const { error } = validateTask(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+// app.put('/tasks/:id', (req, res) => {
+//     const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+//     if (!task) return res.status(404).send('Uloha sa nenasla')
 
-    task.name = req.body.name;
-    res.send(task);
-});
+
+//     const { error } = validateTask(req.body);
+//     if (error) return res.status(400).send(error.details[0].message);
+
+//     task.name = req.body.name;
+//     res.send(task);
+// });
 
 // ------------------------  DELETE  ----------------------------
 
-app.delete('/tasks/:id', (req, res) => {
-    const task = localDatabase.find(task => task.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Uloha sa nenasla');
 
-    const index = localDatabase.indexOf(task);
-    localDatabase.splice(index, 1);
+deleteTask(19);
 
-    res.send(task);
-});
+
+
+// app.delete('/tasks/:id', (req, res) => {
+//     const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+//     if (!task) return res.status(404).send('Uloha sa nenasla');
+
+//     const index = localDatabase.indexOf(task);
+//     localDatabase.splice(index, 1);
+
+//     res.send(task);
+// });
 
 //  -----------------------  VALIDACIA  ------------------------
 
@@ -212,35 +224,6 @@ function validateTask(task) {
 
     return Joi.validate(task, schema);
 }
-
-
-
-
-// app.query("SELECT * FROM ulohy")
-// .then((name) => {
-//   res.send(name)
-
-//   " CREATE TABLE myTable (id int, val varchar(255)) "
-
-//   return conn.query("INSERT INTO ulohy value (?, ?)", [25, "vlozena uloha"]);
-// })
-
-// .then((res) => {
-//   console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-//   conn.end();
-// })
-// .catch(err => {
-//   //handle error
-//   console.log(err); 
-//   conn.end();
-
-// }).catch(err => {
-// console.log('DISCONNECT');
-// })
-
-
-
-
 
 
 
