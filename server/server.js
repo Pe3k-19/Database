@@ -1,56 +1,41 @@
 const express = require("express");
 const app = express();
 app.use(express.json());
-const pool = require('./connection');
 const Joi = require('joi');
 require('dotenv').config();
 const port = process.env.PORT || 3000;
-const birds = require('../client/index')
-app.use('/birds', birds);
+app.use("../client", express.static('public'))
+const mariadb = require('mariadb');
 
-const localDatabase = [
-    {
-        id: 1,
-        name: 'Upratat izbu'
-    },
-    {
-        id: 2,
-        name: 'Vycistit stenu'
-    },
-    {
-        id: 3,
-        name: 'pozametat'
-    },
-    {
-        id: 4,
-        name: 'opravit mixer'
-    }
-]
+const pool = mariadb.createPool({
+    host: '127.0.0.1', 
+    user:'root', 
+    password: '12345',
+    database: 'tasks'
+});
+
 
 const addNewTask = (text) => {
     pool.getConnection()
         .then(conn => {
-            conn.query("SELECT * FROM ulohy")
-                .then((req, res) => {
-                    conn.query("INSERT INTO ulohy VALUE (?,?)", [req.length, text]);
-                    console.log(req.length, text)  // kontrola v konzole
+            // conn.query("SELECT * FROM ulohy")
+            //     .then((req, res) => {
+                    conn.query(`INSERT INTO ulohy (NAME) VALUE ("${text}")`
+                    );
+                    // console.log(text)  // kontrola v konzole
                 })
-        })
+       
 }
+// const getTask = () => {
+//     pool.getConnection()
+//         .then(conn => {
+//             conn.query("SELECT * FROM ulohy")
+//             .then(res => {
+//                 return (res)
+//             })
+//         })
+// }
 
-const getTask = () => {
-    pool.getConnection()
-        .then(conn => {
-            conn.query("SELECT * FROM ulohy")
-                .then((req, res) => {
-                    if (req) {
-                        console.log(req);
-                    } else {
-                        console.log('Fail');
-                    }
-                })
-        })
-}
 
 const updateTask = (id, text) => {
     pool.getConnection()
@@ -67,39 +52,24 @@ const deleteTask = (id) => {
 }
 
 
-
-// pool.getConnection()
-//     .then(conn => {
-
-//       conn.query("SELECT * FROM ulohy")
-//         .then((resolve, reject) => {
-//             if(resolve) {
-//                 console.log(resolve);
-//             }
-//             else {
-//           console.log(reject);
-//             }
-//         })
-
-
-//Table must have been created before 
-// " CREATE TABLE myTable (id int, val varchar(255)) "
-//   return conn.query("INSERT INTO ulohy value (?, ?)", [resolve.length + 1, "nova uloha"]);
-// });
-// .then((res) => {
-//   console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-//   conn.end();
+// app.use('/time/:id', function (req, res, next) {
+//     console.log(req.method);
+// next();
 // })
 
-//     .catch(err => {
-//       //handle error
-//       console.log(err); 
-//       conn.end();
-//     })
+// pool.getConnection()
+// .then( conn => {
+//     conn.query('SELECT * from ulohy', function (err, rows, fields) {
+//         if (err) throw err
+      
+//         console.log('The solution is: ', rows)
+//       })
+      
+//       conn.end()
+// })
 
-// }).catch(err => {
-//     console.log('Not connect')
-// });
+
+
 
 // app.get('/', function (req, res) {
 //     res.send(res);
@@ -117,50 +87,55 @@ const deleteTask = (id) => {
 
 // --------------------     GET   --------------------------
 
-getTask();
+app.get('/data', (req, res) => {
+    return pool.query('SELECT * FROM ulohy')
+    .then(result => {
+        res.json(result);
+    });
+});
 
-
-// app.get('/', (req, res) => {
-//     res.send('Hello world!');
-// });
+app.get('/data/:id', (req, res) => {
+    return pool.query('SELECT * FROM ulohy')
+        .then(result => {
+            const task = result.find(task => task.id === parseInt(req.params.id));
+            res.json(task);
+        });
+})
+    // const task = localDatabase.find(task => task.id === parseInt(req.params.id));
+    // if (!task) return res.status(404).send('Uloha sa nenasla')
+    // res.send(task);
 
 // app.get('/tasks', (req, res) => {
-//     res.send(localDatabase);
+//     // res.json([{
+//     //     id: 1,
+//     //     name: "Hiccup",
+//     //     password: 'hiccup'
+//     //   }, {
+//     //     id: 2,
+//     //     name: "King Arthur",
+//     //     password: 'king-arthur'
+//     //   }]);
+//     console.log(getTask())
+//     // res.json(getTask())
 // });
+
+// app.get('/api/hello', (req, res) => {
+//     res.send({ express: 'Hello From Express' });
+//   });
 
 // app.get('/tasks/:id', (req, res) => {
 //     const task = localDatabase.find(task => task.id === parseInt(req.params.id));
 //     if (!task) return res.status(404).send('Uloha sa nenasla')
 //     res.send(task);
 // });
-// --------------------------------------------------------
 
-// app.get('/rows',  function(req, res) {
-//     pool.getConnection();
-//     pool.query("SELECT * FROM ulohy", function (err, rows, fields) {
-//         pool.end();
-//         if(err) throw err;
-//             res.json(rows);
-
-//     });
-//     })
-
-//     const result = db.getAllData();
-
-//     result
-//     .then(data => response.json({data : data}))
-//     .then(err => console.log(err));
-// })
-
-
-// app.get('/users/:userId/books/:bookId', function (req, res) {
-//     res.send(req.params)
-//   })
 
 
 // --------------------     POST   --------------------------
 
-addNewTask('Nova Uloha');
+// addNewTask('Nova Uloha');
+
+
 
 
 
@@ -182,7 +157,7 @@ addNewTask('Nova Uloha');
 
 // ------------------------  PUT  ----------------------------
 
-updateTask(5, "update");
+// updateTask(5, "update");
 
 
 // app.put('/tasks/:id', (req, res) => {
@@ -200,11 +175,11 @@ updateTask(5, "update");
 // ------------------------  DELETE  ----------------------------
 
 
-deleteTask(19);
+// deleteTask(1);
 
 
 
-// app.delete('/tasks/:id', (req, res) => {
+// app.delete('/data/:id', (req, res) => {
 //     const task = localDatabase.find(task => task.id === parseInt(req.params.id));
 //     if (!task) return res.status(404).send('Uloha sa nenasla');
 
@@ -217,16 +192,16 @@ deleteTask(19);
 //  -----------------------  VALIDACIA  ------------------------
 
 
-function validateTask(task) {
-    const schema = {
-        name: Joi.string().min(3).required()
-    };
+// function validateTask(task) {
+//     const schema = {
+//         name: Joi.string().min(3).required()
+//     };
 
-    return Joi.validate(task, schema);
-}
-
-
+//     return Joi.validate(task, schema);
+// }
 
 
+
+// console.log(localDatabase)
 app.listen(port, () => console.log(`Listening on port ${port}...`));
 
